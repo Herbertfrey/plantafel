@@ -216,11 +216,45 @@
       loginMsg.textContent = "Fehler: " + err.message;
     }
   };
+<header>
+  <h1>Digitale Plantafel Freylich</h1>
+  <div>
+    <button class="btn" id="btnLogin">Anmelden</button>
+    <button class="btn secondary" id="btnHeute">Heute</button>
+    <button class="btn secondary" id="btnWeiter">Weiter</button>
+  </div>
+</header>
+
+<main class="container" id="days"></main>
+
+<aside class="side">
+  <div class="card">
+    <h3>Extras</h3>
+    <p>Mitarbeiter sehen nur Lesedaten</p>
+  </div>
+</aside>
+
+<!-- Login-Dialog -->
+<dialog id="dlgLogin">
+  <form method="dialog" id="loginForm">
+    <h3>Anmelden (Admin)</h3>
+    <label>E-Mail</label>
+    <input id="email" type="email" placeholder="E-Mail-Adresse" required />
+    <label>Passwort</label>
+    <input id="password" type="password" placeholder="Passwort" required />
+    <p id="loginMsg" class="muted"></p>
+    <menu style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
+      <button id="doLogin" class="btn" value="default">Anmelden</button>
+      <button class="btn secondary" value="cancel">Abbrechen</button>
+    </menu>
+  </form>
+</dialog>
 
 <script type="module">
   renderWeek();
 </script>
 </body>
 </html>
+
 
 
