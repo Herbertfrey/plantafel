@@ -1,4 +1,27 @@
-﻿<!DOCTYPE html>
+function renderWeek() {
+  const daysEl = document.getElementById("days");
+  daysEl.innerHTML = ""; // alte Einträge löschen
+
+  const today = new Date();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - ((today.getDay() + 6) % 7)); // Montag berechnen
+
+  const weekdayNames = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"];
+
+  weekdayNames.forEach((name, i) => {
+    const day = new Date(monday);
+    day.setDate(monday.getDate() + i);
+    const div = document.createElement("div");
+    div.className = "day";
+    div.innerHTML = `
+      <h3>${name}, ${day.toLocaleDateString("de-DE")}</h3>
+      <p class="muted">Noch keine Einträge</p>
+    `;
+    daysEl.appendChild(div);
+  });
+}
+
+<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
@@ -222,3 +245,4 @@
 
 </body>
 </html>
+
