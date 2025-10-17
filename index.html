@@ -1,260 +1,420 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Digitale Plantafel Freylich</title>
+  <title>Dachdeckerei Frey – Digitale Plantafel</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f5fa;
-      margin: 0;
-      padding: 0;
-      color: #222;
+    :root{
+      --primary:#1565c0;--bg:#f2f5fa;--card:#fff;--muted:#666;--border:#dde3ea;
+      --status-krank:#ffebee; --status-urlaub:#e8f5e9; --status-schule:#fffde7; --status-frei:#eceff1;
     }
-    header {
-      background: #fff;
-      border-bottom: 2px solid #ddd;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 20px;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-    header h1 {
-      font-size: 20px;
-      margin: 0;
-    }
-    .btn {
-      background: #1565c0;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      padding: 8px 14px;
-      cursor: pointer;
-      font-size: 14px;
-      margin-left: 5px;
-    }
-    .btn.secondary {
-      background: #e0e0e0;
-      color: #000;
-    }
-    .container {
-      display: grid;
-      grid-template-columns: 3fr 1fr;
-      gap: 20px;
-      margin: 20px;
-    }
-    .day {
-      background: #fff;
-      padding: 12px;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      margin-bottom: 10px;
-    }
-    .day h3 {
-      margin-top: 0;
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 5px;
-      color: #1565c0;
-    }
-    .panel {
-      background: #fff;
-      border-radius: 8px;
-      padding: 15px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    .muted { color: #666; font-size: 13px; }
-    dialog {
-      border: none;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    }
-    input {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    .hidden { display: none; }
+    *{box-sizing:border-box}
+    body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:#222}
+    header{background:#fff;border-bottom:2px solid #ddd;display:flex;justify-content:space-between;align-items:center;padding:10px 16px;position:sticky;top:0;z-index:20}
+    header h1{font-size:18px;margin:0}
+    .btn{background:var(--primary);color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:14px}
+    .btn.secondary{background:#e0e0e0;color:#000}
+    .btn.ghost{background:transparent;border:1px solid var(--border);color:#222}
+    .toolbar{display:flex;gap:8px;align-items:center}
+    .container{display:grid;grid-template-columns: 4fr 1.2fr;gap:16px;margin:16px}
+    .panel{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+    .muted{color:var(--muted);font-size:13px}
+
+    /* Days grid */
+    #days{display:grid;grid-template-columns: repeat(2, 1fr); gap:12px}
+    .day{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px;display:flex;flex-direction:column;min-height:280px}
+    .day h3{margin:0 0 8px 0;padding:0 0 8px 0;border-bottom:1px dashed var(--border);color:var(--primary);font-size:16px}
+    .assignments{display:flex;flex-direction:column;gap:6px}
+    .row{display:grid;grid-template-columns: 1.4fr 1.6fr .9fr .5fr;gap:6px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:6px}
+    .row .emp{font-weight:600}
+    .row .statusTag{font-size:12px;border-radius:999px;padding:2px 8px;border:1px solid var(--border);text-align:center}
+    .row[data-status="Krank"]{background:var(--status-krank)}
+    .row[data-status="Urlaub"]{background:var(--status-urlaub)}
+    .row[data-status="Schule"]{background:var(--status-schule)}
+    .row[data-status="Frei"]{background:var(--status-frei)}
+    .empty{padding:10px;border:1px dashed var(--border);border-radius:8px;text-align:center;color:var(--muted)}
+
+    dialog{border:none;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.2);padding:18px;max-width:520px;width:100%}
+    dialog h3{margin:0 0 8px 0}
+    label{font-size:13px;color:#333;margin-top:6px;display:block}
+    input,select{width:100%;padding:8px;border:1px solid var(--border);border-radius:8px}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .list{display:flex;flex-direction:column;gap:6px}
+    .pill{font-size:12px;border:1px solid var(--border);border-radius:999px;padding:4px 8px;display:inline-block;cursor:pointer}
+    .pill.active{background:#e3f2fd;border-color:#90caf9}
+    .footer{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
+
+    @media (max-width:1100px){.container{grid-template-columns:1fr}.row{grid-template-columns:1.2fr 1.2fr .8fr .6fr}}
   </style>
 </head>
 <body>
-
-<header>
-  <h1>Digitale Plantafel Freylich</h1>
-  <div>
-    <button id="btnPrev" class="btn secondary">←</button>
-    <button id="btnToday" class="btn secondary">Heute</button>
-    <button id="btnNext" class="btn secondary">→</button>
-    <button id="btnLogin" class="btn">Anmelden</button>
-  </div>
-</header>
-
-<main class="container">
-  <section>
-    <div id="days"></div>
-  </section>
-  <aside class="panel">
-    <h3>Extras</h3>
-    <div id="adminPanel" class="hidden">
-      <button id="btnAdd" class="btn">+ Kleinbaustelle</button>
-      <button id="btnData" class="btn secondary">Stammdaten</button>
+  <header>
+    <h1>Dachdeckerei Frey – Digitale Plantafel</h1>
+    <div class="toolbar">
+      <button id="btnPrev" class="btn secondary">← 14 Tage</button>
+      <button id="btnToday" class="btn secondary">Heute</button>
+      <button id="btnNext" class="btn secondary">14 Tage →</button>
+      <button id="btnLogin" class="btn">Anmelden</button>
     </div>
-    <p class="muted">Mitarbeiter sehen nur Lesedaten.</p>
-  </aside>
-</main>
+  </header>
 
-<dialog id="dlgLogin">
-  <form method="dialog">
-    <h3>Admin Login</h3>
-    <input type="email" id="email" placeholder="E-Mail-Adresse" />
-    <input type="password" id="password" placeholder="Passwort" />
-    <button id="doLogin" class="btn">Anmelden</button>
-    <button class="btn secondary" value="cancel">Abbrechen</button>
-    <p id="loginMsg" class="muted"></p>
-  </form>
-</dialog>
+  <main class="container">
+    <section>
+      <div id="rangeTitle" class="muted" style="margin:6px 0 10px 4px"></div>
+      <div id="days"></div>
+    </section>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-  import { 
-    getAuth, signInWithEmailAndPassword, signInAnonymously, signOut, onAuthStateChanged 
-  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+    <aside class="panel">
+      <h3>Extras</h3>
+      <div id="adminPanel" class="hidden">
+        <button id="btnAddDayEntry" class="btn">+ Eintrag</button>
+        <button id="btnData" class="btn ghost">Stammdaten</button>
+      </div>
+      <p class="muted">Mitarbeiter sehen nur Lesedaten.</p>
+    </aside>
+  </main>
 
- const firebaseConfig = {
-  apiKey: "AIzaSyAqxqRI3ixV-vQttjiaaHnkmIQ5Vgrva3U",
-  authDomain: "plantafel-freylich.firebaseapp.com",
-  projectId: "plantafel-freylich",
-  storageBucket: "plantafel-freylich.firebasestorage.app",
-  messagingSenderId: "428812257773",
-  appId: "1:428812257773:web:d60db9f0c3075a1bff3fe4",
-  measurementId: "G-MNGGTFK53R"
-};
+  <!-- Admin Login -->
+  <dialog id="dlgLogin">
+    <form method="dialog">
+      <h3>Admin Login</h3>
+      <input type="email" id="email" placeholder="E-Mail-Adresse" />
+      <input type="password" id="password" placeholder="Passwort" />
+      <div class="footer">
+        <button id="doLogin" class="btn">Anmelden</button>
+        <button class="btn secondary" value="cancel">Abbrechen</button>
+      </div>
+      <p id="loginMsg" class="muted"></p>
+    </form>
+  </dialog>
 
-  };
+  <!-- Stammdaten Dialog -->
+  <dialog id="dlgData">
+    <form method="dialog">
+      <h3>Stammdaten</h3>
+      <div class="grid2">
+        <div>
+          <label>Mitarbeiter (eine Zeile pro Name)</label>
+          <textarea id="dataEmployees" rows="8" style="width:100%"></textarea>
+        </div>
+        <div>
+          <label>Baustellen/Projekte (eine Zeile pro Eintrag)</label>
+          <textarea id="dataProjects" rows="8" style="width:100%"></textarea>
+        </div>
+      </div>
+      <div class="grid2" style="margin-top:8px">
+        <div>
+          <label>Fahrzeuge (eine Zeile pro Eintrag)</label>
+          <textarea id="dataVehicles" rows="6" style="width:100%"></textarea>
+        </div>
+        <div>
+          <label>Status (fix)</label>
+          <div class="list">
+            <span class="pill">Krank</span>
+            <span class="pill">Urlaub</span>
+            <span class="pill">Schule</span>
+            <span class="pill">Frei</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <button id="saveData" class="btn">Speichern</button>
+        <button class="btn secondary" value="cancel">Schließen</button>
+      </div>
+      <p class="muted">Hinweis: Stammdaten werden zentral gespeichert und auf allen Geräten genutzt.</p>
+    </form>
+  </dialog>
 
-  const ADMIN_EMAILS = [
-    "herbert.frey@bedachungen-frey.de",
-    "thomas.frey@bedachungen-frey.de",
-    "patrick.thieme@bedachungen-frey.de"
-  ];
+  <!-- Edit Dialog -->
+  <dialog id="dlgEdit">
+    <form method="dialog">
+      <h3>Eintrag bearbeiten</h3>
+      <div class="grid2">
+        <div>
+          <label>Datum</label>
+          <input id="editDate" type="date" />
+        </div>
+        <div>
+          <label>Mitarbeiter</label>
+          <select id="editEmployee"></select>
+        </div>
+      </div>
+      <label>Projekt/Baustelle</label>
+      <select id="editProject"></select>
+      <label>Fahrzeug</label>
+      <select id="editVehicle"></select>
+      <label>Status</label>
+      <select id="editStatus">
+        <option value="">–</option>
+        <option>Krank</option>
+        <option>Urlaub</option>
+        <option>Schule</option>
+        <option>Frei</option>
+      </select>
+      <div class="footer">
+        <button id="saveEntry" class="btn">Speichern</button>
+        <button id="deleteEntry" class="btn ghost">Löschen</button>
+        <button class="btn secondary" value="cancel">Abbrechen</button>
+      </div>
+      <p id="editMsg" class="muted"></p>
+    </form>
+  </dialog>
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+  <script type="module">
+    /**************** Firebase Setup ****************/
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, query, where, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-  const btnLogin = document.getElementById("btnLogin");
-  const dlgLogin = document.getElementById("dlgLogin");
-  const doLogin = document.getElementById("doLogin");
-  const adminPanel = document.getElementById("adminPanel");
-  const loginMsg = document.getElementById("loginMsg");
-  let isAdmin = false;
+    const firebaseConfig = {
+      apiKey: "AIzaSyAqxqRI3ixV-vQttjiaaHnkmIQ5Vgrva3U",
+      authDomain: "plantafel-freylich.firebaseapp.com",
+      projectId: "plantafel-freylich",
+      storageBucket: "plantafel-freylich.firebasestorage.app",
+      messagingSenderId: "428812257773",
+      appId: "1:428812257773:web:d60db9f0c3075a1bff3fe4",
+      measurementId: "G-MNGGTFK53R"
+    };
 
-  // Montag–Freitag anzeigen
-  function getMonday(d) {
-    const date = new Date(d);
-    const day = date.getDay();
-    const diff = (day <= 0 ? -6 : 1) - day;
-    date.setDate(date.getDate() + diff);
-    return date;
-  }
+    const ADMIN_EMAILS = [
+      "herbert.frey@bedachungen-frey.de",
+      "thomas.frey@bedachungen-frey.de",
+      "patrick.thieme@bedachungen-frey.de"
+    ];
 
-  function addDays(date, days) {
-    const d = new Date(date);
-    d.setDate(d.getDate() + days);
-    return d;
-  }
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-  function formatDate(d) {
-    return d.toLocaleDateString("de-DE", { weekday: "long", day: "2-digit", month: "2-digit" });
-  }
+    /**************** DOM refs ****************/
+    const btnLogin = document.getElementById('btnLogin');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnToday = document.getElementById('btnToday');
+    const btnAddDayEntry = document.getElementById('btnAddDayEntry');
+    const btnData = document.getElementById('btnData');
+    const adminPanel = document.getElementById('adminPanel');
+    const loginMsg = document.getElementById('loginMsg');
+    const rangeTitle = document.getElementById('rangeTitle');
 
-  function renderWeek() {
-    const daysEl = document.getElementById("days");
-    daysEl.innerHTML = "";
-    let monday = getMonday(new Date());
-    for (let i = 0; i < 5; i++) {
-      const day = addDays(monday, i);
-      const div = document.createElement("div");
-      div.className = "day";
-      div.innerHTML = `<h3>${formatDate(day)}</h3><p class='muted'>Noch keine Einträge</p>`;
-      daysEl.appendChild(div);
+    const dlgLogin = document.getElementById('dlgLogin');
+    const dlgEdit = document.getElementById('dlgEdit');
+    const dlgData = document.getElementById('dlgData');
+
+    const editDate = document.getElementById('editDate');
+    const editEmployee = document.getElementById('editEmployee');
+    const editProject = document.getElementById('editProject');
+    const editVehicle = document.getElementById('editVehicle');
+    const editStatus = document.getElementById('editStatus');
+    const editMsg = document.getElementById('editMsg');
+
+    const dataEmployees = document.getElementById('dataEmployees');
+    const dataProjects = document.getElementById('dataProjects');
+    const dataVehicles = document.getElementById('dataVehicles');
+
+    let isAdmin = false;
+    let startDate = getMonday(new Date()); // beginning of 1st week in view
+    let unsubPlans = null; // firestore unsubscribe
+    let settings = { employees: [], projects: [], vehicles: [] };
+
+    /**************** Date helpers (Mo–Fr × zwei Wochen) ****************/
+    function getMonday(d){
+      const date = new Date(d); const day = date.getDay();
+      const diff = (day <= 0 ? -6 : 1) - day; // shift to Monday
+      date.setHours(12,0,0,0); // avoid DST edge cases
+      date.setDate(date.getDate() + diff);
+      return date;
     }
-  }
+    function addDays(date, days){ const d=new Date(date); d.setDate(d.getDate()+days); return d; }
+    function fmtDateKey(d){ return d.toISOString().slice(0,10); } // YYYY-MM-DD
+    function fmtTitle(d){ return d.toLocaleDateString('de-DE',{ weekday:'long', day:'2-digit', month:'2-digit'}); }
 
-  // Authentifizierung
-  signInAnonymously(auth);
+    function setRangeTitle(){
+      const end = addDays(startDate, 9); // two Mon–Fri weeks = 10 Tage
+      const rangeTxt = `${startDate.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'})} – ${end.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'})}`;
+      const kw1 = getWeekNumber(startDate), kw2 = getWeekNumber(end);
+      rangeTitle.textContent = `Anzeige: 14 Tage (Mo–Fr × 2) • KW ${kw1} – KW ${kw2}`;
+    }
+    function getWeekNumber(d){
+      const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      const dayNum = date.getUTCDay() || 7; date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
+      const weekNo = Math.ceil(((date - yearStart)/86400000 + 1)/7); return weekNo;
+    }
 
-  onAuthStateChanged(auth, (user) => {
-    isAdmin = user && user.email && ADMIN_EMAILS.includes(user.email);
-    adminPanel.classList.toggle("hidden", !isAdmin);
-  });
+    /**************** Firestore: settings (Stammdaten) ****************/
+    async function loadSettings(){
+      const snap = await getDoc(doc(db,'meta','settings'));
+      if (snap.exists()) settings = snap.data();
+      else settings = { employees:["Mitarbeiter 1","Mitarbeiter 2"], projects:["Baustelle A","Baustelle B"], vehicles:["Transporter 1"] };
+      // Hydrate UI fields
+      dataEmployees.value = settings.employees.join('\n');
+      dataProjects.value = settings.projects.join('\n');
+      dataVehicles.value = settings.vehicles.join('\n');
+    }
+    async function saveSettings(){
+      const payload = {
+        employees: dataEmployees.value.split('\n').map(s=>s.trim()).filter(Boolean),
+        projects: dataProjects.value.split('\n').map(s=>s.trim()).filter(Boolean),
+        vehicles: dataVehicles.value.split('\n').map(s=>s.trim()).filter(Boolean),
+        updatedAt: new Date().toISOString()
+      };
+      await setDoc(doc(db,'meta','settings'), payload, { merge:true });
+      settings = payload;
+      alert('Stammdaten gespeichert.');
+    }
 
-  btnLogin.onclick = () => {
-    if (isAdmin) {
-      signOut(auth);
-      alert("Abgemeldet.");
-    } else {
+    function fillSelectOptions(){
+      editEmployee.innerHTML = settings.employees.map(e=>`<option>${e}</option>`).join('');
+      editProject.innerHTML = ['','—'].concat(settings.projects).map(p=>`<option>${p}</option>`).join('');
+      editVehicle.innerHTML = ['','—'].concat(settings.vehicles).map(v=>`<option>${v}</option>`).join('');
+    }
+
+    /**************** Firestore: live plan data ****************/
+    function listenPlans(){
+      if (unsubPlans) unsubPlans();
+      const startKey = fmtDateKey(startDate);
+      const endKey = fmtDateKey(addDays(startDate,9)); // inclusive range
+
+      // We model docs as: plans/{date}/{employeeId}
+      // We'll attach 10 listeners (one per date) to keep it simple.
+      const dayContainer = document.getElementById('days');
+      dayContainer.innerHTML = '';
+
+      const dayElems = [];
+      for (let i=0;i<10;i++){
+        const d = addDays(startDate,i);
+        const dayKey = fmtDateKey(d);
+        const wrap = document.createElement('div');
+        wrap.className = 'day';
+        wrap.dataset.date = dayKey;
+        wrap.innerHTML = `<h3>${fmtTitle(d)}</h3><div class="assignments" id="list-${dayKey}"></div>`;
+        dayContainer.appendChild(wrap);
+        dayElems.push({ key:dayKey, el:wrap });
+
+        // live listener per date
+        const col = collection(db,'plans',dayKey,'entries');
+        onSnapshot(col, (snap)=>{
+          const list = document.getElementById(`list-${dayKey}`);
+          list.innerHTML = '';
+          if (snap.empty){ list.innerHTML = '<div class="empty">Noch keine Einträge</div>'; return; }
+          const items = [];
+          snap.forEach(docu=>items.push({ id:docu.id, ...docu.data() }));
+          // sort by employee name
+          items.sort((a,b)=> (a.employee||'').localeCompare(b.employee||''));
+          for (const it of items){
+            const row = document.createElement('div');
+            row.className = 'row';
+            row.dataset.status = it.status||'';
+            row.innerHTML = `
+              <div class="emp">${it.employee||''}</div>
+              <div>${it.project||''}</div>
+              <div>${it.vehicle||''}</div>
+              <div class="statusTag">${it.status||''}</div>
+            `;
+            if (isAdmin){ row.style.cursor='pointer'; row.onclick = ()=> openEdit(dayKey, it); }
+            list.appendChild(row);
+          }
+        });
+      }
+    }
+
+    async function saveEntry(payload){
+      // doc id by employee name for idempotency (1 entry/employee/day)
+      const id = payload.employee.replace(/[^a-z0-9]/gi,'_').toLowerCase();
+      await setDoc(doc(db,'plans', payload.date, 'entries', id), payload, { merge:true });
+    }
+    async function deleteEntry(date, employee){
+      const id = employee.replace(/[^a-z0-9]/gi,'_').toLowerCase();
+      await deleteDoc(doc(db,'plans', date, 'entries', id));
+    }
+
+    /**************** UI actions ****************/
+    function renderRange(){ setRangeTitle(); listenPlans(); }
+
+    btnPrev.onclick = ()=>{ startDate = addDays(startDate,-14); renderRange(); };
+    btnNext.onclick = ()=>{ startDate = addDays(startDate, 14); renderRange(); };
+    btnToday.onclick = ()=>{ startDate = getMonday(new Date()); renderRange(); };
+
+    btnLogin.onclick = async ()=>{
+      if (isAdmin){ await signOut(auth); alert('Abgemeldet.'); return; }
       dlgLogin.showModal();
+    };
+
+    document.getElementById('doLogin').onclick = async (e)=>{
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const pass = document.getElementById('password').value;
+      loginMsg.textContent = 'Anmeldung läuft…';
+      try{
+        await signInWithEmailAndPassword(auth,email,pass);
+        loginMsg.textContent = 'Erfolgreich angemeldet.';
+        setTimeout(()=> dlgLogin.close(), 400);
+      }catch(err){ loginMsg.textContent = 'Fehler: ' + err.message; }
+    };
+
+    onAuthStateChanged(auth, async (user)=>{
+      const email = user?.email || '';
+      isAdmin = !!email && ADMIN_EMAILS.includes(email);
+      adminPanel.classList.toggle('hidden', !isAdmin);
+      await loadSettings();
+      fillSelectOptions();
+      renderRange();
+    });
+
+    // Stammdaten Dialog
+    btnData.onclick = async ()=>{
+      await loadSettings(); fillSelectOptions(); dlgData.showModal();
+    };
+    document.getElementById('saveData').onclick = async (e)=>{ e.preventDefault(); await saveSettings(); dlgData.close(); fillSelectOptions(); };
+
+    // Quick add
+    btnAddDayEntry.onclick = ()=>{
+      const todayKey = fmtDateKey(new Date());
+      editDate.value = todayKey;
+      editEmployee.value = settings.employees[0]||'';
+      editProject.value = '';
+      editVehicle.value = '';
+      editStatus.value = '';
+      editMsg.textContent = '';
+      dlgEdit.showModal();
+    };
+
+    function openEdit(dateKey, item){
+      editDate.value = dateKey;
+      editEmployee.value = item.employee || settings.employees[0]||'';
+      editProject.value = item.project||'';
+      editVehicle.value = item.vehicle||'';
+      editStatus.value = item.status||'';
+      editMsg.textContent = '';
+      dlgEdit.showModal();
     }
-  };
 
-  doLogin.onclick = async (e) => {
-    e.preventDefault();
-    const email = document.getElementById("email").value;
-    const pass = document.getElementById("password").value;
-    loginMsg.textContent = "Anmeldung läuft...";
-    try {
-      await signInWithEmailAndPassword(auth, email, pass);
-      loginMsg.textContent = "Erfolgreich angemeldet.";
-      setTimeout(() => dlgLogin.close(), 500);
-    } catch (err) {
-      loginMsg.textContent = "Fehler: " + err.message;
-    }
-  };
-<header>
-  <h1>Digitale Plantafel Freylich</h1>
-  <div>
-    <button class="btn" id="btnLogin">Anmelden</button>
-    <button class="btn secondary" id="btnHeute">Heute</button>
-    <button class="btn secondary" id="btnWeiter">Weiter</button>
-  </div>
-</header>
+    document.getElementById('saveEntry').onclick = async (e)=>{
+      e.preventDefault();
+      if (!isAdmin){ alert('Keine Berechtigung.'); return; }
+      const payload = {
+        date: editDate.value,
+        employee: editEmployee.value,
+        project: editProject.value,
+        vehicle: editVehicle.value,
+        status: editStatus.value,
+        updatedAt: new Date().toISOString(),
+        updatedBy: auth.currentUser?.email || 'unbekannt'
+      };
+      await saveEntry(payload);
+      editMsg.textContent = 'Gespeichert.';
+      setTimeout(()=> dlgEdit.close(), 300);
+    };
 
-<main class="container" id="days"></main>
+    document.getElementById('deleteEntry').onclick = async (e)=>{
+      e.preventDefault();
+      if (!isAdmin){ alert('Keine Berechtigung.'); return; }
+      await deleteEntry(editDate.value, editEmployee.value);
+      dlgEdit.close();
+    };
 
-<aside class="side">
-  <div class="card">
-    <h3>Extras</h3>
-    <p>Mitarbeiter sehen nur Lesedaten</p>
-  </div>
-</aside>
-
-<!-- Login-Dialog -->
-<dialog id="dlgLogin">
-  <form method="dialog" id="loginForm">
-    <h3>Anmelden (Admin)</h3>
-    <label>E-Mail</label>
-    <input id="email" type="email" placeholder="E-Mail-Adresse" required />
-    <label>Passwort</label>
-    <input id="password" type="password" placeholder="Passwort" required />
-    <p id="loginMsg" class="muted"></p>
-    <menu style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
-      <button id="doLogin" class="btn" value="default">Anmelden</button>
-      <button class="btn secondary" value="cancel">Abbrechen</button>
-    </menu>
-  </form>
-</dialog>
-
-<script type="module">
-  renderWeek();
-</script>
+  </script>
 </body>
 </html>
-
-
-
